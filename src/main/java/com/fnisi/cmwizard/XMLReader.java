@@ -80,7 +80,7 @@ public class XMLReader {
 
                     // add this managed object to the map
                     // managed object class -> list of managed objects of type class
-                    addMangedObject(mo);
+                    addManagedObject(mo);
                 }
             }
         }
@@ -123,12 +123,11 @@ public class XMLReader {
         }
     }
 
-    private void addMangedObject(ManagedObject managedObject){
+    private void addManagedObject(ManagedObject managedObject){
         String type = managedObject.getType();
 
         if (!managedObjects.containsKey(type)) {
-            List<ManagedObject> mos = new ArrayList<>();
-            managedObjects.put(type, mos);
+            managedObjects.put(type, new ArrayList<>());
         }
         managedObjects.get(type).add(managedObject);
     }
