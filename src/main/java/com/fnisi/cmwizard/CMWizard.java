@@ -1,7 +1,6 @@
 package com.fnisi.cmwizard;
 
 import org.xml.sax.SAXException;
-import sun.lwawt.macosx.CSystemTray;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -104,12 +103,9 @@ public class CMWizard {
         return panel;
     }
 
-    private static JPanel createTabs() {
+    private static JComponent createTabs() {
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setBackground(new Color(255,0,0));
-        JPanel tabPanel = new JPanel();
-        tabPanel.setLayout(new BorderLayout());
-        tabPanel.setBackground(new Color(0,255,0));
 
         if (xmlReader != null) {
             for (String tabName: xmlReader.getMoClasses()) {
@@ -117,8 +113,7 @@ public class CMWizard {
             }
         }
 
-        tabPanel.add(tabbedPane, BorderLayout.CENTER);
-        return tabPanel;
+        return tabbedPane;
     }
 
     public static void main(String[] args) {
