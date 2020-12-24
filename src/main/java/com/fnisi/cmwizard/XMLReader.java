@@ -30,8 +30,9 @@ public class XMLReader {
         // read and parse the XML file
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        // Since we do not have the DTD file, ignore the reference
-        // and provide a new entity resolver instead
+        // Since we do not have the DTD file, we should ignore the reference to the
+        // document type definition file. In order to do that provide a new entity
+        // resolver to replace the default one which looks for the DTD file
         documentBuilder.setEntityResolver((publicId, systemId) -> {
             if (systemId.contains("raml20.dtd")) {
                 return new InputSource(new StringReader(""));
@@ -54,7 +55,7 @@ public class XMLReader {
                 moClasses.add(managedObjectClassName);
 
                 // set the name afterwards when the "name" property is read from
-                // the XML file
+                // the reference XML file
                 ManagedObject mo = new ManagedObject("", managedObjectClassName);
 
                 // iterate through all the "p" and "list" nodes
@@ -69,19 +70,20 @@ public class XMLReader {
                         String pname = childNode.getAttributes().getNamedItem("name").getNodeValue();
                         String pvalue = childNode.getFirstChild().getNodeValue();
 
+                        // this maintains the list of all possible properties for each
+                        // managed object class
                         addPropertyForMoClass(managedObjectClassName, pname);
 
+                        // we deferred defining the name for the managed object
                         if (pname.compareTo("name") == 0){
                             mo.setName(pvalue);
-                        } else {
-                            mo.addProperty(pname, pvalue);
                         }
+                        mo.addProperty(pname, pvalue);
                     }
-
-                    // add this managed object to the map
-                    // managed object class -> list of managed objects of type class
-                    addManagedObject(mo);
                 }
+                // add this managed object to the map
+                // managed object class -> list of managed objects of type class
+                addManagedObject(mo);
             }
         }
 
