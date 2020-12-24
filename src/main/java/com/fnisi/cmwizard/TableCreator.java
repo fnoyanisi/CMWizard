@@ -16,16 +16,14 @@ public class TableCreator {
     }
 
     public JComponent createTabs() {
-        tabbedPane.setBackground(new Color(255,0,0));
-//        JPanel tabPanel = new JPanel();
-//        tabPanel.setLayout(new BorderLayout());
-//        tabPanel.setBackground(new Color(0,255,0));
+        tabbedPane.setBackground(new Color(12, 234, 170, 81));
 
         if (xmlReader != null) {
             for (Map.Entry<String, List<ManagedObject>> entry: xmlReader.getManagedObjects().entrySet()) {
                 // key -> managedObject class
                 // value -> list of managed objects in this class
                 Vector<String> header = new Vector<>(xmlReader.getPropertiesOf(entry.getKey()));
+                header.add(0, "Name");
                 Vector<Vector<String>> data = new Vector<>();
 
                 // for each managedObject, iterate through its properties
@@ -37,6 +35,7 @@ public class TableCreator {
                     // getPropertiesOf() method since this includes every possible
                     // properties.
                     Vector<String> row = new Vector<>();
+                    row.add(0, mo.getName());
                     for (String property: xmlReader.getPropertiesOf(entry.getKey())) {
                         if(properties.containsKey(property)) {
                             row.add(properties.get(property));
@@ -46,12 +45,31 @@ public class TableCreator {
                     }
                     data.add(row);
                 }
-                tabbedPane.addTab(entry.getKey(), new JTable(data, header));
+                JTable table = new JTable(data, header);
+                table.setPreferredScrollableViewportSize(table.getPreferredSize());
+                table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
+                table.setShowGrid(true);
+
+                JScrollPane scrollPane = new JScrollPane(table);
+                scrollPane.add(table.getTableHeader());
+
+                tabbedPane.addTab(entry.getKey(),scrollPane);
             }
         }
 
 //        tabPanel.add(tabbedPane, BorderLayout.CENTER);
 //        return tabPanel;
-        return tabbedPane;
+        //return tabbedPane;
+
+        JFrame frame = new JFrame("TabbedPaneDemo");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        //Add content to the window.
+        frame.add(tabbedPane, BorderLayout.CENTER);
+
+        //Display the window.
+        frame.pack();
+        frame.setVisible(true);
+        return null;
     }
 }
