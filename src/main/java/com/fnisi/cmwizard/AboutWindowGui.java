@@ -6,11 +6,13 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 
 public class AboutWindowGui extends JFrame {
     private final int height = 400;
     private final int width = 580;
     private final String licenseFileName = "LICENSE";
+    private final String iconFileName = "cmwizard-64.png";
 
     public AboutWindowGui() {
         super("About CM Wizard");
@@ -23,14 +25,20 @@ public class AboutWindowGui extends JFrame {
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
 
         Image myImage = null;
-        try {
-            myImage = ImageIO.read(getClass().getResource("cmwizard-64.png"));
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
+        URL imageUrl = getClass().getResource(iconFileName);
+        if (imageUrl != null) {
+            try {
+                myImage = ImageIO.read(imageUrl);
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+            myImage = myImage.getScaledInstance(64, 64, Image.SCALE_SMOOTH);
+            ImageIcon myImageIcon = new ImageIcon(myImage);
+            mainPanel.add(centeredComponent(new JLabel(myImageIcon), false, true));
+        } else {
+            mainPanel.add(centeredComponent(new JLabel("Missing image"), false, true));
         }
-        myImage = myImage.getScaledInstance(64, 64, Image.SCALE_SMOOTH);
-        ImageIcon myImageIcon = new ImageIcon(myImage);
-        mainPanel.add(centeredComponent(new JLabel(myImageIcon), false, true));
+
 
         mainPanel.add(centeredComponent(new JLabel("CM Wizard"), true, true));
 
