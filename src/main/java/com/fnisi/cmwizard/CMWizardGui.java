@@ -2,6 +2,7 @@ package com.fnisi.cmwizard;
 
 import org.xml.sax.SAXException;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.parsers.ParserConfigurationException;
@@ -9,14 +10,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.net.URL;
 
 public class CMWizardGui {
     private static XMLReader xmlReader;
     private static JFrame frame;
+    private static final String iconFileName = "cmwizard-64.png";
 
     /**
      * Create the GUI and show it.  For thread safety,
@@ -29,9 +28,33 @@ public class CMWizardGui {
         frame = new JFrame("CM Wizard");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // The main layout is a vertical box
         JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.LINE_AXIS));
+        Image myImage = null;
+        URL imageUrl = CMWizardGui.class.getResource(iconFileName);
+        if (imageUrl != null) {
+            try {
+                myImage = ImageIO.read(imageUrl);
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+            myImage = myImage.getScaledInstance(64, 64, Image.SCALE_SMOOTH);
+            ImageIcon myImageIcon = new ImageIcon(myImage);
+            JLabel imgLabel = new JLabel(myImageIcon, JLabel.CENTER);
+            JPanel imgPanel = new JPanel();
+            imgPanel.setLayout(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            imgPanel.add(imgLabel, gbc);
+            mainPanel.add(imgPanel);
+        } else {
+            JLabel imgLabel = new JLabel("Missing image");
+            imgLabel.setHorizontalAlignment(JLabel.CENTER);
+            mainPanel.add(imgLabel);
+        }
+
+        JPanel buttonPanel = new JPanel();
+        //buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.PAGE_AXIS));
+        buttonPanel.setLayout(new GridLayout(2,1,20,5));
 
         // Tabs panel
         JPanel tabsPanel = new JPanel();
@@ -72,11 +95,14 @@ public class CMWizardGui {
             new AboutWindowGui();
         });
 
-        mainPanel.add(openFileButton);
-        mainPanel.add(aboutButton);
+        buttonPanel.add(openFileButton);
+        buttonPanel.add(aboutButton);
+
+        mainPanel.add(buttonPanel);
 
         //Display the window.
         frame.add(mainPanel);
+        frame.setResizable(false);
         frame.pack();
         frame.setVisible(true);
     }
