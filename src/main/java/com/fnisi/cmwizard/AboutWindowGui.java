@@ -1,15 +1,16 @@
 package com.fnisi.cmwizard;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.security.DigestException;
 
 public class AboutWindowGui extends JFrame {
-    private static final int height = 480;
-    private static final int width = 640;
+    private final int height = 400;
+    private final int width = 580;
+    private final String licenseFileName = "LICENSE";
 
     public AboutWindowGui() {
         super("About CM Wizard");
@@ -18,48 +19,61 @@ public class AboutWindowGui extends JFrame {
         setResizable(false);
         setLayout(new BorderLayout());
 
-        JTextArea textArea = new JTextArea();
-        JScrollPane scrollPane = new JScrollPane(textArea);
-
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
 
-        JLabel titleLabel = new JLabel("CM Wizard");
-        titleLabel.setFont(new Font("Verdana", Font.BOLD, 18));
-        titleLabel.setVerticalAlignment(JLabel.CENTER);
-        titleLabel.setHorizontalAlignment(JLabel.CENTER);
-        JPanel titlePanel = new JPanel();
-        //titlePanel.setMaximumSize(new Dimension(width, 30));
-        titlePanel.setMaximumSize(new Dimension(width, titleLabel.getPreferredSize().height + 10));
-        titlePanel.add(titleLabel);
-        mainPanel.add(titlePanel);
+        Image myImage = null;
+        try {
+            myImage = ImageIO.read(getClass().getResource("cmwizard-64.png"));
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+        myImage = myImage.getScaledInstance(64, 64, Image.SCALE_SMOOTH);
+        ImageIcon myImageIcon = new ImageIcon(myImage);
+        mainPanel.add(centeredComponent(new JLabel(myImageIcon), false, true));
 
-        JLabel urlLabel = new JLabel("https://github.com/fnoyanisi/CMWizard");
-        urlLabel.setFont(new Font("Verdana", Font.PLAIN, 12));
-        urlLabel.setVerticalAlignment(JLabel.CENTER);
-        urlLabel.setHorizontalAlignment(JLabel.CENTER);
-        JPanel urlPanel = new JPanel();
-        urlPanel.setMaximumSize(new Dimension(width, urlLabel.getPreferredSize().height + 10));
-        urlPanel.add(urlLabel);
-        mainPanel.add(urlPanel);
+        mainPanel.add(centeredComponent(new JLabel("CM Wizard"), true, true));
 
-        InputStream inputStream = getClass().getResourceAsStream("LICEN,,SE");
+        mainPanel.add(centeredComponent(new JLabel("https://github.com/fnoyanisi/CMWizard"), false, true));
+
+        InputStream inputStream = getClass().getResourceAsStream(licenseFileName);
         if (inputStream != null) {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            JTextArea textArea = new JTextArea();
+            JScrollPane scrollPane = new JScrollPane(textArea);
             try {
                 textArea.read(inputStreamReader, null);
+                textArea.setEditable(false);
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
             mainPanel.add(scrollPane);
         } else {
-            JLabel label = new JLabel("CM Wizard", JLabel.CENTER);
-            label.setFont(new Font("Verdana", Font.PLAIN, 12));
-            mainPanel.add(label);
+            JPanel p = centeredComponent(new JLabel("Cannot find the " + licenseFileName + " file!"),false, false);
+            mainPanel.add(p);
         }
 
         add(mainPanel);
         pack();
         setVisible(true);
+    }
+
+    private JPanel centeredComponent(JLabel label, boolean isBold, boolean isPacked) {
+        label.setHorizontalAlignment(JLabel.CENTER);
+        Font font;
+        if (isBold)
+            font = new Font("Verdana", Font.BOLD, 16);
+        else
+            font = new Font("Verdana", Font.PLAIN, 12);
+        label.setFont(font);
+        JPanel panel = new JPanel();
+        // use GridBagLayout with default constraints for vertical alignment
+        panel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        if (isPacked) {
+            panel.setMaximumSize(new Dimension(width, label.getPreferredSize().height + 10));
+        }
+        panel.add(label, gbc);
+        return panel;
     }
 }
