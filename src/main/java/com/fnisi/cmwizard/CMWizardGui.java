@@ -72,13 +72,9 @@ public class CMWizardGui {
                 File file = fc.getSelectedFile();
                 try {
                     xmlReader = new XMLReader(file);
-                    TableCreator tc = new TableCreator(xmlReader);
                     tabsPanel.removeAll();
-                    //ExecutorService executorService = Executors.newSingleThreadExecutor();
-                    //executorService.submit(() -> {
-                        tc.createTabs();
-                    //});
-
+                    TableCreator tc = new TableCreator(xmlReader);
+                    tc.createTabs();
                 } catch (ParserConfigurationException parserConfigurationException) {
                     parserConfigurationException.printStackTrace();
                 } catch (IOException ioException) {
