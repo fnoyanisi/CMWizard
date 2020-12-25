@@ -14,11 +14,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class CMWizard {
+public class CMWizardGui {
     private static XMLReader xmlReader;
     private static JFrame frame;
-    private static final int width = 640;
-    private static final int height = 480;
 
     /**
      * Create the GUI and show it.  For thread safety,
@@ -30,8 +28,6 @@ public class CMWizard {
         //Create and set up the window.
         frame = new JFrame("CM Wizard");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setMinimumSize(new Dimension(width, height));
-        frame.setResizable(false);
 
         // The main layout is a vertical box
         JPanel mainPanel = new JPanel();
@@ -39,7 +35,6 @@ public class CMWizard {
 
         // Tabs panel
         JPanel tabsPanel = new JPanel();
-        tabsPanel.setBackground(new Color(0,0,255));
 
         // Open file button
         JButton openFileButton = new JButton("Open XML file");
@@ -91,8 +86,14 @@ public class CMWizard {
             }
         });
 
+        // About CM Wizard button
+        JButton aboutButton = new JButton("About CM Wizard");
+        aboutButton.addActionListener((ActionEvent e) -> {
+            new AboutWindowGui();
+        });
+
         mainPanel.add(openFileButton);
-        mainPanel.add(tabsPanel);
+        mainPanel.add(aboutButton);
 
         //Display the window.
         frame.add(mainPanel);
@@ -109,22 +110,9 @@ public class CMWizard {
         return panel;
     }
 
-    private static JComponent createTabs() {
-        JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.setBackground(new Color(255,0,0));
-
-        if (xmlReader != null) {
-            for (String tabName: xmlReader.getMoClasses()) {
-                tabbedPane.addTab(tabName, makeTable());
-            }
-        }
-
-        return tabbedPane;
-    }
-
     public static void main(String[] args) {
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(CMWizard::createAndShowGUI);
+        javax.swing.SwingUtilities.invokeLater(CMWizardGui::createAndShowGUI);
     }
 }
