@@ -80,6 +80,7 @@ public class TableCreator {
                 table.setPreferredScrollableViewportSize(table.getPreferredSize());
                 table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
                 table.setShowGrid(true);
+                table.setAutoCreateRowSorter(true);
                 table.setGridColor(gridColor);
                 table.getTableHeader().setFont(headerFont);
                 table.getTableHeader().setBackground(headerColor);
