@@ -53,7 +53,6 @@ public class CMWizardGui {
         }
 
         JPanel buttonPanel = new JPanel();
-        //buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.PAGE_AXIS));
         buttonPanel.setLayout(new GridLayout(2,1,20,5));
 
         // Tabs panel
@@ -101,15 +100,6 @@ public class CMWizardGui {
         frame.setResizable(false);
         frame.pack();
         frame.setVisible(true);
-    }
-
-    private static JComponent makeTable() {
-        JPanel panel = new JPanel(false);
-        JLabel filler = new JLabel("Panel #4 (has a preferred size of 410 x 50).");
-        filler.setHorizontalAlignment(JLabel.CENTER);
-        panel.setLayout(new GridLayout(1, 1));
-        panel.add(filler);
-        return panel;
     }
 
     public static void main(String[] args) {
