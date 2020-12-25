@@ -1,6 +1,7 @@
 package com.fnisi.cmwizard;
 
 import javax.swing.*;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.util.Map;
 import java.util.Vector;
@@ -9,10 +10,17 @@ import java.util.List;
 public class TableCreator {
     private JTabbedPane tabbedPane;
     private XMLReader xmlReader;
+    private final Color headerColor, gridColor, bgColor, selectionColor;
+    private final Font headerFont;
 
     public TableCreator(XMLReader xmlReader) {
         this.xmlReader = xmlReader;
         this.tabbedPane = new JTabbedPane();
+        this.headerColor = new Color(177, 177, 177);
+        this.gridColor = new Color(71, 71, 71);
+        this.bgColor = new Color(250, 250, 250);
+        this.selectionColor = new Color(5, 52, 154);
+        this.headerFont = new Font("Arial", Font.BOLD, 12);
     }
 
     public JComponent createTabs() {
@@ -45,10 +53,36 @@ public class TableCreator {
                     }
                     data.add(row);
                 }
-                JTable table = new JTable(data, header);
+                JTable table = new JTable(data, header) {
+                    // make the first column non-editable
+                    @Override
+                    public boolean isCellEditable(int row, int column) {
+                        return column == 0? false : true;
+                    }
+
+                    // match the format of the first column with the header's
+                    @Override
+                    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+                        Component c = super.prepareRenderer(renderer, row, column);
+                        if (column == 0) {
+                            c.setBackground(headerColor);
+                            c.setFont(headerFont);
+                        } else {
+                            c.setBackground(bgColor);
+                        }
+
+                        if (isCellSelected(row, column)) {
+                            c.setBackground(selectionColor);
+                        }
+                        return c;
+                    }
+                };
                 table.setPreferredScrollableViewportSize(table.getPreferredSize());
                 table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
                 table.setShowGrid(true);
+                table.setGridColor(gridColor);
+                table.getTableHeader().setFont(headerFont);
+                table.getTableHeader().setBackground(headerColor);
 
                 JScrollPane scrollPane = new JScrollPane(table);
                 scrollPane.add(table.getTableHeader());
@@ -56,10 +90,6 @@ public class TableCreator {
                 tabbedPane.addTab(entry.getKey(),scrollPane);
             }
         }
-
-//        tabPanel.add(tabbedPane, BorderLayout.CENTER);
-//        return tabPanel;
-        //return tabbedPane;
 
         JFrame frame = new JFrame("TabbedPaneDemo");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -51,30 +51,10 @@ public class CMWizardGui {
                     xmlReader = new XMLReader(file);
                     TableCreator tc = new TableCreator(xmlReader);
                     tabsPanel.removeAll();
-                    ExecutorService executorService = Executors.newSingleThreadExecutor();
-                    executorService.submit(() -> {
-                        //tabsPanel.add(tc.createTabs());
+                    //ExecutorService executorService = Executors.newSingleThreadExecutor();
+                    //executorService.submit(() -> {
                         tc.createTabs();
-                        //frame.revalidate();
-                        //frame.repaint();
-
-                    });
-
-//                    ExecutorService executor = Executors.newSingleThreadExecutor();
-//                    executor.submit(() -> {
-//                        for (Map.Entry<String, List<ManagedObject>> entry: xmlReader.getManagedObjects().entrySet()) {
-//                            System.out.println("entries for " + entry.getKey());
-//                            System.out.println("===============================");
-//                            for (ManagedObject mo: entry.getValue()){
-//                                System.out.println("\t" + mo.getName());
-//                                for (Map.Entry<String, String> p : mo.getProperties().entrySet()){
-//                                    System.out.println("\t\t- " + p.getKey() + "\t= " + p.getValue());
-//                                }
-//                            }
-//                        }
-//                    });
-//
-//                    executor.shutdown();
+                    //});
 
                 } catch (ParserConfigurationException parserConfigurationException) {
                     parserConfigurationException.printStackTrace();
