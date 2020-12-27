@@ -113,6 +113,14 @@ public class XMLReader {
         return retList;
     }
 
+    public int getNumberOfManagedObjects() {
+        int size = 0;
+        for (Map.Entry<String, List<ManagedObject>> entry: managedObjects.entrySet()){
+            size += entry.getValue().size();
+        }
+        return size;
+    }
+
     // adds an item into the relevant moObject's list of properties
     // creates a new entry if the key does not exist
     private void addPropertyForMoClass(String moClass, String property){
