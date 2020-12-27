@@ -2,6 +2,7 @@ package com.fnisi.cmwizard;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -34,7 +35,17 @@ class CMWizardGui extends JPanel implements PropertyChangeListener {
     public CMWizardGui() {
         super();
 
-        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        progressBar = new JProgressBar(0, 100);
+        progressBar.setValue(0);
+        progressBar.setStringPainted(true);
+
+        setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+        setBorder(new EmptyBorder(10,10,10,10));
+
+        JPanel upperPanel = new JPanel();
+        upperPanel.setLayout(new BoxLayout(upperPanel, BoxLayout.LINE_AXIS));
+        upperPanel.setBorder(new EmptyBorder(5,5,5,5));
+
         Image myImage = null;
         URL imageUrl = CMWizardGui.class.getResource(iconFileName);
         if (imageUrl != null) {
@@ -50,11 +61,11 @@ class CMWizardGui extends JPanel implements PropertyChangeListener {
             imgPanel.setLayout(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();
             imgPanel.add(imgLabel, gbc);
-            add(imgPanel);
+            upperPanel.add(imgPanel);
         } else {
             JLabel imgLabel = new JLabel("Missing image");
             imgLabel.setHorizontalAlignment(JLabel.CENTER);
-            add(imgLabel);
+            upperPanel.add(imgLabel);
         }
 
         JPanel buttonPanel = new JPanel();
@@ -86,6 +97,9 @@ class CMWizardGui extends JPanel implements PropertyChangeListener {
         buttonPanel.add(openFileButton);
         buttonPanel.add(aboutButton);
 
-        add(buttonPanel);
+        upperPanel.add(buttonPanel);
+
+        add(upperPanel);
+        add(progressBar);
     }
 }
