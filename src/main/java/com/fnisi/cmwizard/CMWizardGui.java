@@ -1,11 +1,8 @@
 package com.fnisi.cmwizard;
 
-import org.xml.sax.SAXException;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
@@ -16,7 +13,6 @@ import java.net.URL;
 
 class CMWizardGui extends JPanel implements PropertyChangeListener {
     private JProgressBar progressBar;
-    private XMLReader xmlReader;
     private final String iconFileName = "cmwizard-64.png";
 
     /**
@@ -64,9 +60,6 @@ class CMWizardGui extends JPanel implements PropertyChangeListener {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new GridLayout(2,1,20,5));
 
-        // Tabs panel
-        JPanel tabsPanel = new JPanel();
-
         // Open file button
         JButton openFileButton = new JButton("Open XML file");
         openFileButton.addActionListener((ActionEvent e) -> {
@@ -78,21 +71,9 @@ class CMWizardGui extends JPanel implements PropertyChangeListener {
 
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
-                try {
-                    Task task = new Task();
-                    task.addPropertyChangeListener(this);
-
-                    xmlReader = new XMLReader(file);
-                    tabsPanel.removeAll();
-                    TableCreator tc = new TableCreator(xmlReader);
-                    tc.createTabs();
-                } catch (ParserConfigurationException parserConfigurationException) {
-                    parserConfigurationException.printStackTrace();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                } catch (SAXException saxException) {
-                    saxException.printStackTrace();
-                }
+                Task task = new Task(file);
+                task.addPropertyChangeListener(this);
+                task.execute();
             }
         });
 
