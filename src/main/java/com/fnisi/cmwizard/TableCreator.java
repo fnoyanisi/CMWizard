@@ -3,6 +3,8 @@ package com.fnisi.cmwizard;
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Map;
 import java.util.Vector;
 import java.util.List;
@@ -16,11 +18,11 @@ public class TableCreator {
     public TableCreator(XMLReader xmlReader) {
         this.xmlReader = xmlReader;
         this.tabbedPane = new JTabbedPane();
-        this.headerColor = new Color(177, 177, 177);
-        this.gridColor = new Color(71, 71, 71);
+        this.headerColor = new Color(198, 198, 198);
+        this.gridColor = new Color(0, 0, 0);
         this.bgColor = new Color(250, 250, 250);
         this.selectionColor = new Color(5, 52, 154);
-        this.headerFont = new Font("Arial", Font.BOLD, 12);
+        this.headerFont = new Font("Arial", Font.PLAIN, 12);
     }
 
     public JComponent createTabs() {
@@ -77,13 +79,28 @@ public class TableCreator {
                         return c;
                     }
                 };
+                // add a MouseListener to column header so that the user can select
+                // a column when the header is clicked
+                table.getTableHeader().addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        super.mousePressed(e);
+                        int clickedIndex = table.convertColumnIndexToModel(table.columnAtPoint(e.getPoint()));
+                        table.setColumnSelectionInterval(clickedIndex, clickedIndex); //selects which column will have all its rows selected
+                        table.setRowSelectionInterval(0, table.getRowCount() - 1); //once column has been selected, select all rows from 0 to the end of that column
+                    }
+                });
                 table.setPreferredScrollableViewportSize(table.getPreferredSize());
                 table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
-                table.setShowGrid(true);
-                table.setAutoCreateRowSorter(true);
                 table.setGridColor(gridColor);
                 table.getTableHeader().setFont(headerFont);
                 table.getTableHeader().setBackground(headerColor);
+                table.setShowGrid(true);
+                table.setAutoCreateRowSorter(true);
+                table.setColumnSelectionAllowed(true);
+                table.setRowSelectionAllowed(true);
+                table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+                table.setCellSelectionEnabled(true);
 
                 JScrollPane scrollPane = new JScrollPane(table);
                 scrollPane.add(table.getTableHeader());
