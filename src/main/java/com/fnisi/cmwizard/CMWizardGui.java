@@ -8,28 +8,37 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-public class CMWizardGui {
-    private static XMLReader xmlReader;
-    private static JFrame frame;
-    private static final String iconFileName = "cmwizard-64.png";
+class CMWizardGui extends JPanel implements PropertyChangeListener {
+    private JProgressBar progressBar;
+    private XMLReader xmlReader;
+    private final String iconFileName = "cmwizard-64.png";
+
+    /**
+     * Invoked when task's progress property changes.
+     * required by the PropertyChangeListener interface
+     */
+    public void propertyChange(PropertyChangeEvent evt) {
+        if ("progress" == evt.getPropertyName()) {
+            int progress = (Integer) evt.getNewValue();
+            progressBar.setValue(progress);
+        }
+    }
 
     /**
      * Create the GUI and show it.  For thread safety,
      * this method should be invoked from the
      * event-dispatching thread.
      */
-    private static void createAndShowGUI() {
+    public CMWizardGui() {
+        super();
 
-        //Create and set up the window.
-        frame = new JFrame("CM Wizard");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.LINE_AXIS));
+        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
         Image myImage = null;
         URL imageUrl = CMWizardGui.class.getResource(iconFileName);
         if (imageUrl != null) {
@@ -45,11 +54,11 @@ public class CMWizardGui {
             imgPanel.setLayout(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();
             imgPanel.add(imgLabel, gbc);
-            mainPanel.add(imgPanel);
+            add(imgPanel);
         } else {
             JLabel imgLabel = new JLabel("Missing image");
             imgLabel.setHorizontalAlignment(JLabel.CENTER);
-            mainPanel.add(imgLabel);
+            add(imgLabel);
         }
 
         JPanel buttonPanel = new JPanel();
@@ -70,6 +79,9 @@ public class CMWizardGui {
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
                 try {
+                    Task task = new Task();
+                    task.addPropertyChangeListener(this);
+
                     xmlReader = new XMLReader(file);
                     tabsPanel.removeAll();
                     TableCreator tc = new TableCreator(xmlReader);
@@ -93,18 +105,6 @@ public class CMWizardGui {
         buttonPanel.add(openFileButton);
         buttonPanel.add(aboutButton);
 
-        mainPanel.add(buttonPanel);
-
-        //Display the window.
-        frame.add(mainPanel);
-        frame.setResizable(false);
-        frame.pack();
-        frame.setVisible(true);
-    }
-
-    public static void main(String[] args) {
-        //Schedule a job for the event-dispatching thread:
-        //creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(CMWizardGui::createAndShowGUI);
+        add(buttonPanel);
     }
 }
