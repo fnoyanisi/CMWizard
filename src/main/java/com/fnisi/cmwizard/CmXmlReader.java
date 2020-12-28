@@ -14,19 +14,19 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 
-public class CmXmlReader {
+public class CmXmlReader implements Iterable<> {
     private File xmlFile;
     private Document doc;
     private Set<String> moClasses;
     private Map<String, Set<String>> moProperties;
-    private Map<String, List<ManagedObject>> managedObjects;
-    private Map<String, Integer> numberOfManagedObjects;
+    private SortedMap<String, List<ManagedObject>> managedObjects;
+    private SortedMap<String, Integer> numberOfManagedObjects;
 
     public CmXmlReader(File file) throws ParserConfigurationException, IOException, SAXException {
         this.xmlFile = file;
         this.moClasses = new HashSet<>();
         this.moProperties = new HashMap<>();
-        this.managedObjects = new HashMap<>();
+        this.managedObjects = new SortedMap<>();
         this.numberOfManagedObjects = new HashMap<>();
 
         // read and parse the XML file
@@ -127,7 +127,7 @@ public class CmXmlReader {
 
     // returns the number of managed objects only for the
     // managed object class given by the type parameter
-    public int GetNumberOfManagedObjectsFor(String type) {
+    public int getNumberOfManagedObjectsFor(String type) {
         if (numberOfManagedObjects.containsKey(type)) {
             return numberOfManagedObjects.get(type);
         }
@@ -155,5 +155,27 @@ public class CmXmlReader {
         }
         managedObjects.get(type).add(managedObject);
         numberOfManagedObjects.computeIfPresent(type, (key, value) -> value+1);
+    }
+
+    @Override
+    public Iterator<CmXmlReader> iterator() {
+        return new CmXmlReaderIterator<CmXmlReader>(this);
+    }
+}
+
+class CmXmlReaderIterator<CmXmlReader> implements Iterator<CmXmlReader> {
+    private final CmXmlReader reader;
+
+    public CmXmlReaderIterator(CmXmlReader reader){
+        this.reader = reader;
+    }
+    @Override
+    public boolean hasNext() {
+        return false;
+    }
+
+    @Override
+    public CmXmlReader next() {
+        return null;
     }
 }
