@@ -115,12 +115,23 @@ public class CmXmlReader {
         return retList;
     }
 
-    public int getNumberOfManagedObjects() {
-        int size = 0;
-        for (Map.Entry<String, List<ManagedObject>> entry: managedObjects.entrySet()){
-            size += entry.getValue().size();
+    // returns the total number of managed objects found in the
+    // whole XML tree
+    public int getTotalNumberOfManagedObjects() {
+        int n = 0;
+        for (Map.Entry<String, Integer> entry : numberOfManagedObjects.entrySet()) {
+            n += entry.getValue();
         }
-        return size;
+        return n;
+    }
+
+    // returns the number of managed objects only for the
+    // managed object class given by the type parameter
+    public int GetNumberOfManagedObjectsFor(String type) {
+        if (numberOfManagedObjects.containsKey(type)) {
+            return numberOfManagedObjects.get(type);
+        }
+        return -1;
     }
 
     // adds an item into the relevant moObject's list of properties
@@ -143,7 +154,6 @@ public class CmXmlReader {
             numberOfManagedObjects.put(type, 0);
         }
         managedObjects.get(type).add(managedObject);
-        int n = numberOfManagedObjects.get(type) + 1;
-        numberOfManagedObjects.put(type, n);
+        numberOfManagedObjects.computeIfPresent(type, (key, value) -> value+1);
     }
 }
