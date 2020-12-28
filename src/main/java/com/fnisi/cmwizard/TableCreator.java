@@ -11,28 +11,38 @@ import java.util.List;
 
 public class TableCreator {
     private JTabbedPane tabbedPane;
-    private XMLReader xmlReader;
+    private CmXmlReader cmXmlReader;
     private final Color headerColor, gridColor, bgColor, selectionColor;
     private final Font headerFont;
+    private int totalRows;
+    private Task task;
 
-    public TableCreator(XMLReader xmlReader) {
-        this.xmlReader = xmlReader;
+    public TableCreator(CmXmlReader cmXmlReader) {
+        this.cmXmlReader = cmXmlReader;
         this.tabbedPane = new JTabbedPane();
         this.headerColor = new Color(198, 198, 198);
         this.gridColor = new Color(0, 0, 0);
         this.bgColor = new Color(250, 250, 250);
         this.selectionColor = new Color(5, 52, 154);
         this.headerFont = new Font("Arial", Font.PLAIN, 12);
+
+        this.task = null;
+    }
+
+    public void setTask(Task t) {
+        this.task = t;
     }
 
     public JComponent createTabs() {
         tabbedPane.setBackground(new Color(12, 234, 170, 81));
+        int rowsSoFar = 0;
 
-        if (xmlReader != null) {
-            for (Map.Entry<String, List<ManagedObject>> entry: xmlReader.getManagedObjects().entrySet()) {
+        if (cmXmlReader != null) {
+            totalRows = cmXmlReader.getNumberOfManagedObjects();
+            for (Map.Entry<String, List<ManagedObject>> entry: cmXmlReader.getManagedObjects().entrySet()) {
                 // key -> managedObject class
                 // value -> list of managed objects in this class
-                Vector<String> header = new Vector<>(xmlReader.getPropertiesOf(entry.getKey()));
+                Vector<String> header = new Vector<>(cmXmlReader.getPropertiesOf(entry.getKey()));
                 header.add(0, "Name");
                 Vector<Vector<String>> data = new Vector<>();
 
@@ -46,12 +56,18 @@ public class TableCreator {
                     // properties.
                     Vector<String> row = new Vector<>();
                     row.add(0, mo.getName());
-                    for (String property: xmlReader.getPropertiesOf(entry.getKey())) {
+                    for (String property: cmXmlReader.getPropertiesOf(entry.getKey())) {
                         if(properties.containsKey(property)) {
                             row.add(properties.get(property));
                         } else {
                             row.add("#N/A");
                         }
+                    }
+                    rowsSoFar++;
+                    if (task != null) {
+                        int p = totalRows / rowsSoFar;
+                        task.updateProgress(p);
+                        System.out.println(totalRows + " - " + rowsSoFar + " - " + p);
                     }
                     data.add(row);
                 }

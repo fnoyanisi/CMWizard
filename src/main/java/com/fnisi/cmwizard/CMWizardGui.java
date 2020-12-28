@@ -14,6 +14,9 @@ import java.net.URL;
 
 class CMWizardGui extends JPanel implements PropertyChangeListener {
     private JProgressBar progressBar;
+    private JLabel statusLabel;
+    private Task task;
+    private boolean done;
     private final String iconFileName = "cmwizard-64.png";
 
     /**
@@ -21,9 +24,17 @@ class CMWizardGui extends JPanel implements PropertyChangeListener {
      * required by the PropertyChangeListener interface
      */
     public void propertyChange(PropertyChangeEvent evt) {
-        if ("progress" == evt.getPropertyName()) {
-            int progress = (Integer) evt.getNewValue();
-            progressBar.setValue(progress);
+        if (!done) {
+            int progress = task.getProgress();
+            if (progress == 0) {
+                progressBar.setIndeterminate(true);
+                statusLabel.setText("Reading the XML file");
+            } else {
+                progressBar.setIndeterminate(false);
+                progressBar.setString(null);
+                progressBar.setValue(progress);
+                statusLabel.setText("Parsing the XML file");
+            }
         }
     }
 
@@ -38,6 +49,8 @@ class CMWizardGui extends JPanel implements PropertyChangeListener {
         progressBar = new JProgressBar(0, 100);
         progressBar.setValue(0);
         progressBar.setStringPainted(true);
+
+        statusLabel = new JLabel("");
 
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         setBorder(new EmptyBorder(10,10,10,10));
@@ -82,7 +95,8 @@ class CMWizardGui extends JPanel implements PropertyChangeListener {
 
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
-                Task task = new Task(file);
+                //done = false;
+                task = new Task(file);
                 task.addPropertyChangeListener(this);
                 task.execute();
             }
@@ -94,12 +108,17 @@ class CMWizardGui extends JPanel implements PropertyChangeListener {
             new AboutWindowGui();
         });
 
+        // status panel
+        JPanel statusPanel = new JPanel();
+        statusPanel.add(statusLabel);
+
         buttonPanel.add(openFileButton);
         buttonPanel.add(aboutButton);
 
         upperPanel.add(buttonPanel);
 
         add(upperPanel);
+        add(statusPanel);
         add(progressBar);
     }
 }

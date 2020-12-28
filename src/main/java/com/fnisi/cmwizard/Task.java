@@ -12,8 +12,15 @@ class Task extends SwingWorker<Void, Void> {
 
     @Override
     protected Void doInBackground() throws Exception {
-        XMLReader xmlReader = new XMLReader(file);
-        TableCreator tc = new TableCreator(xmlReader);
+        int progress = 0, totalRecords;
+
+        setProgress(0);
+        CmXmlReader cmXmlReader = new CmXmlReader(file);
+        totalRecords = cmXmlReader.getNumberOfManagedObjects();
+
+        //setProgress(1);
+        TableCreator tc = new TableCreator(cmXmlReader);
+        tc.setTask(this);
         tc.createTabs();
         return null;
     }
@@ -21,6 +28,10 @@ class Task extends SwingWorker<Void, Void> {
     @Override
     protected void done() {
         System.out.println("DONE");
+    }
+
+    public void updateProgress(int p) {
+        setProgress(p);
     }
 }
 

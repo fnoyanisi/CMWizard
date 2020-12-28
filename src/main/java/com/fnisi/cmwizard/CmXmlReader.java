@@ -14,18 +14,20 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 
-public class XMLReader {
+public class CmXmlReader {
     private File xmlFile;
     private Document doc;
     private Set<String> moClasses;
     private Map<String, Set<String>> moProperties;
     private Map<String, List<ManagedObject>> managedObjects;
+    private Map<String, Integer> numberOfManagedObjects;
 
-    public XMLReader(File file) throws ParserConfigurationException, IOException, SAXException {
+    public CmXmlReader(File file) throws ParserConfigurationException, IOException, SAXException {
         this.xmlFile = file;
         this.moClasses = new HashSet<>();
         this.moProperties = new HashMap<>();
         this.managedObjects = new HashMap<>();
+        this.numberOfManagedObjects = new HashMap<>();
 
         // read and parse the XML file
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -138,7 +140,10 @@ public class XMLReader {
 
         if (!managedObjects.containsKey(type)) {
             managedObjects.put(type, new ArrayList<>());
+            numberOfManagedObjects.put(type, 0);
         }
         managedObjects.get(type).add(managedObject);
+        int n = numberOfManagedObjects.get(type) + 1;
+        numberOfManagedObjects.put(type, n);
     }
 }
