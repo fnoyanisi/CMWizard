@@ -14,20 +14,14 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 
-public class CmXmlReader implements Iterable<> {
+public class CmXmlReader {
     private File xmlFile;
     private Document doc;
-    private Set<String> moClasses;
-    private Map<String, Set<String>> moProperties;
-    private SortedMap<String, List<ManagedObject>> managedObjects;
-    private SortedMap<String, Integer> numberOfManagedObjects;
+    private Set<ManagedObjectClass> managedObjectClasses;
 
     public CmXmlReader(File file) throws ParserConfigurationException, IOException, SAXException {
         this.xmlFile = file;
-        this.moClasses = new HashSet<>();
-        this.moProperties = new HashMap<>();
-        this.managedObjects = new SortedMap<>();
-        this.numberOfManagedObjects = new HashMap<>();
+        this.managedObjectClasses = new TreeSet<>();
 
         // read and parse the XML file
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -54,7 +48,7 @@ public class CmXmlReader implements Iterable<> {
             Node managedObjectNodeClass = managedObjectNode.getAttributes().getNamedItem("class");
             if (managedObjectNodeClass != null && managedObjectNodeClass.getNodeType() == Node.ATTRIBUTE_NODE) {
                 String managedObjectClassName = managedObjectNodeClass.getNodeValue();
-                moClasses.add(managedObjectClassName);
+                ManagedObjectClass managedObjectClass = new ManagedObjectClass(managedObjectClassName);
 
                 // set the name afterwards when the "name" property is read from
                 // the reference XML file
@@ -74,7 +68,7 @@ public class CmXmlReader implements Iterable<> {
 
                         // this maintains the list of all possible properties for each
                         // managed object class
-                        addPropertyForMoClass(managedObjectClassName, pname);
+                        managedObjectClass.addProperty(pname);
 
                         // we deferred defining the name for the managed object
                         if (pname.compareTo("name") == 0){
@@ -85,7 +79,7 @@ public class CmXmlReader implements Iterable<> {
                 }
                 // add this managed object to the map
                 // managed object class -> list of managed objects of type class
-                addManagedObject(mo);
+                managedObjectClass.addManagedObject(mo);
             }
         }
 
@@ -93,89 +87,63 @@ public class CmXmlReader implements Iterable<> {
 
     // returns an alphabetically sorted list of managedObjects names
     public List<String> getMoClasses() {
-        List<String> ret = new ArrayList<>(moClasses);
-        Collections.sort(ret);
-        return ret;
+        List<String> moClasses = new ArrayList<>();
+        for (ManagedObjectClass moc: managedObjectClasses) {
+            moClasses.add(moc.getName());
+        }
+        Collections.sort(moClasses);
+        return moClasses;
     }
 
-    public Map<String, List<ManagedObject>> getManagedObjects() {
-        return managedObjects;
+    public List<ManagedObject> getManagedObjects() {
+        List<ManagedObject> mo = new ArrayList<>();
+        for (ManagedObjectClass moc : managedObjectClasses){
+            mo.addAll(moc.getManagedObjects());
+        }
+        return mo;
+    }
+
+    public List<ManagedObject> getManagedObjectsOf(String mocName){
+        for (ManagedObjectClass moc : managedObjectClasses) {
+            if (moc.getName().compareTo(mocName) == 0) {
+                return moc.getManagedObjects();
+            }
+        }
+        return null;
     }
 
     // returns a list of property names that the node "moName"
     // contains. If the XML document does not have a managed object
     // with moName, an empty list is returned
-    public List<String> getPropertiesOf(String moName) {
-        Set<String> ret = moProperties.get(moName);
-        if (ret == null)
-            return new ArrayList<>();
-
-        List<String> retList = new ArrayList<>(ret);
-        Collections.sort(retList);
-        return retList;
+    public List<String> getPropertiesOf(String mocName) {
+        for (ManagedObjectClass moc: managedObjectClasses) {
+            if (moc.getName().compareTo(mocName) == 0){
+                List<String> ret = new ArrayList<>(moc.getProperties());
+                Collections.sort(ret);
+                return ret;
+            }
+        }
+        return null;
     }
 
     // returns the total number of managed objects found in the
     // whole XML tree
     public int getTotalNumberOfManagedObjects() {
         int n = 0;
-        for (Map.Entry<String, Integer> entry : numberOfManagedObjects.entrySet()) {
-            n += entry.getValue();
+        for (ManagedObjectClass moc : managedObjectClasses) {
+            n += moc.getManagedObjects().size();
         }
         return n;
     }
 
     // returns the number of managed objects only for the
     // managed object class given by the type parameter
-    public int getNumberOfManagedObjectsFor(String type) {
-        if (numberOfManagedObjects.containsKey(type)) {
-            return numberOfManagedObjects.get(type);
+    public int getNumberOfManagedObjectsFor(String mocName) {
+        for (ManagedObjectClass moc : managedObjectClasses){
+            if (moc.getName().compareTo(mocName) == 0){
+                return moc.getManagedObjects().size();
+            }
         }
         return -1;
-    }
-
-    // adds an item into the relevant moObject's list of properties
-    // creates a new entry if the key does not exist
-    private void addPropertyForMoClass(String moClass, String property){
-        if (moProperties.containsKey(moClass)) {
-            moProperties.get(moClass).add(property);
-        } else {
-            Set<String> properties = new HashSet<>();
-            properties.add(property);
-            moProperties.put(moClass, properties);
-        }
-    }
-
-    private void addManagedObject(ManagedObject managedObject){
-        String type = managedObject.getType();
-
-        if (!managedObjects.containsKey(type)) {
-            managedObjects.put(type, new ArrayList<>());
-            numberOfManagedObjects.put(type, 0);
-        }
-        managedObjects.get(type).add(managedObject);
-        numberOfManagedObjects.computeIfPresent(type, (key, value) -> value+1);
-    }
-
-    @Override
-    public Iterator<CmXmlReader> iterator() {
-        return new CmXmlReaderIterator<CmXmlReader>(this);
-    }
-}
-
-class CmXmlReaderIterator<CmXmlReader> implements Iterator<CmXmlReader> {
-    private final CmXmlReader reader;
-
-    public CmXmlReaderIterator(CmXmlReader reader){
-        this.reader = reader;
-    }
-    @Override
-    public boolean hasNext() {
-        return false;
-    }
-
-    @Override
-    public CmXmlReader next() {
-        return null;
     }
 }
