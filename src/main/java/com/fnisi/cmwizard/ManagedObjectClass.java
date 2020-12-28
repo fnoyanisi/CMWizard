@@ -2,15 +2,17 @@ package com.fnisi.cmwizard;
 
 import java.util.*;
 
-public class ManagedObjectClass implements Comparable<ManagedObjectClass>, Iterable<ManagedObjectClass> {
+public class ManagedObjectClass implements Comparable<ManagedObjectClass>, Iterable<ManagedObject> {
     private List<ManagedObject> managedObjects;
     private final String name;
     private Set<String> properties;
+    private int nextIndex;          // array index to be used for the next ManagedObject in the list
 
     public ManagedObjectClass(String name) {
         this.name = name;
         this.managedObjects = new ArrayList<>();
         this.properties = new TreeSet<>();
+        this.nextIndex = 0;
     }
 
     public List<ManagedObject> getManagedObjects() {
@@ -33,8 +35,19 @@ public class ManagedObjectClass implements Comparable<ManagedObjectClass>, Itera
         return properties.contains(property);
     }
 
+    public ManagedObject getManagedObject(int index) {
+        if (nextIndex > 0 && index >= 0 && index < managedObjects.size()) {
+            return managedObjects.get(index);
+        }
+        return null;
+    }
+
     public Set<String> getProperties(){
         return properties;
+    }
+
+    public int getNextIndex() {
+        return nextIndex;
     }
 
     @Override
@@ -43,12 +56,12 @@ public class ManagedObjectClass implements Comparable<ManagedObjectClass>, Itera
     }
 
     @Override
-    public Iterator<ManagedObjectClass> iterator() {
+    public Iterator<ManagedObject> iterator() {
         return new ManagedObjectClassIterator(this);
     }
 }
 
-class ManagedObjectClassIterator implements Iterator<ManagedObjectClass> {
+class ManagedObjectClassIterator implements Iterator<ManagedObject> {
     private final ManagedObjectClass moc;
 
     public ManagedObjectClassIterator(ManagedObjectClass moc){
@@ -57,16 +70,11 @@ class ManagedObjectClassIterator implements Iterator<ManagedObjectClass> {
 
     @Override
     public boolean hasNext() {
-        return false;
+        return moc.getManagedObjects().size() > moc.getNextIndex();
     }
 
     @Override
-    public ManagedObjectClass next() {
-        return null;
-    }
-
-    @Override
-    public void remove() {
-
+    public ManagedObject next() {
+        return moc.getManagedObject(moc.getNextIndex());
     }
 }
