@@ -5,9 +5,15 @@ import java.io.File;
 
 class Task extends SwingWorker<Void, Void> {
     private File file;
+    private CMWizardGui cmWizardGui;
 
     public Task(File file) {
         this.file = file;
+        this.cmWizardGui = null;
+    }
+
+    public void setCmWizardGui(CMWizardGui c) {
+        this.cmWizardGui = c;
     }
 
     @Override
@@ -27,7 +33,9 @@ class Task extends SwingWorker<Void, Void> {
 
     @Override
     protected void done() {
-        System.out.println("DONE");
+        if (cmWizardGui != null) {
+            cmWizardGui.setStatusLabel("Completed!");
+        }
     }
 
     public void updateProgress(int p) {

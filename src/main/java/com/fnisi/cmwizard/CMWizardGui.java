@@ -50,7 +50,8 @@ class CMWizardGui extends JPanel implements PropertyChangeListener {
         progressBar.setValue(0);
         progressBar.setStringPainted(true);
 
-        statusLabel = new JLabel("");
+        statusLabel = new JLabel("   ");
+        done = false;
 
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         setBorder(new EmptyBorder(10,10,10,10));
@@ -94,9 +95,10 @@ class CMWizardGui extends JPanel implements PropertyChangeListener {
             int returnVal = fc.showOpenDialog(openFileButton.getParent());
 
             if (returnVal == JFileChooser.APPROVE_OPTION) {
+                done = false;
                 File file = fc.getSelectedFile();
-                //done = false;
                 task = new Task(file);
+                task.setCmWizardGui(this);
                 task.addPropertyChangeListener(this);
                 task.execute();
             }
@@ -120,5 +122,11 @@ class CMWizardGui extends JPanel implements PropertyChangeListener {
         add(upperPanel);
         add(statusPanel);
         add(progressBar);
+    }
+
+    public void setStatusLabel(String text) {
+        this.statusLabel.setText(text);
+        this.statusLabel.paintImmediately(statusLabel.getVisibleRect());
+        done = true;
     }
 }
