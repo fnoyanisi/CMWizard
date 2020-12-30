@@ -15,15 +15,11 @@ import java.io.StringReader;
 import java.util.*;
 
 public class CmXmlReader {
-    private File xmlFile;
-    private Document doc;
-    private Map<String, ManagedObjectClass> managedObjectClasses;
-    private Map<String, Set<String>> properties;
+    private final Map<String, ManagedObjectClass> managedObjectClasses;
 
     public CmXmlReader(File file) throws ParserConfigurationException, IOException, SAXException {
-        this.xmlFile = file;
         this.managedObjectClasses = new TreeMap<>();
-        this.properties = new TreeMap<>();
+        Map<String, Set<String>> properties = new TreeMap<>();
 
         // read and parse the XML file
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -38,7 +34,7 @@ public class CmXmlReader {
                 return null;
             }
         });
-        doc = documentBuilder.parse(xmlFile);
+        Document doc = documentBuilder.parse(file);
         doc.getDocumentElement().normalize();
 
         // traverse through all the nodes. we are interested in managedObject nodes

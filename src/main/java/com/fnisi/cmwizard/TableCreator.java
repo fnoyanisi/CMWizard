@@ -10,8 +10,8 @@ import java.util.Vector;
 import java.util.List;
 
 public class TableCreator {
-    private JTabbedPane tabbedPane;
-    private CmXmlReader cmXmlReader;
+    private final JTabbedPane tabbedPane;
+    private final CmXmlReader cmXmlReader;
     private final Color headerColor, gridColor, bgColor, selectionColor;
     private final Font headerFont;
     private Task task;
@@ -67,7 +67,7 @@ public class TableCreator {
                     // make the first column non-editable
                     @Override
                     public boolean isCellEditable(int row, int column) {
-                        return column == 0? false : true;
+                        return column != 0;
                     }
 
                     // match the format of the first column with the header's

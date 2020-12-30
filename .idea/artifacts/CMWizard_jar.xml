@@ -4,7 +4,7 @@
     <root id="root">
       <element id="archive" name="CMWizard.jar">
         <element id="directory" name="META-INF">
-          <element id="file-copy" path="$USER_HOME$/META-INF/MANIFEST.MF" />
+          <element id="file-copy" path="$PROJECT_DIR$/out/artifacts/CMWizard_jar/META-INF/MANIFEST.MF" />
         </element>
         <element id="module-output" name="CMWizard" />
       </element>

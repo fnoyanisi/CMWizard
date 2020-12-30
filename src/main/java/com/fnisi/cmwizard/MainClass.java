@@ -19,6 +19,7 @@ public class MainClass {
         frame.setContentPane(newContentPane);
 
         //Display the window.
+        frame.setResizable(false);
         frame.pack();
         frame.setVisible(true);
     }
