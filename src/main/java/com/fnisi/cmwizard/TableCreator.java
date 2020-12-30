@@ -24,7 +24,6 @@ public class TableCreator {
         this.bgColor = new Color(250, 250, 250);
         this.selectionColor = new Color(5, 52, 154);
         this.headerFont = new Font("Arial", Font.PLAIN, 12);
-
         this.task = null;
     }
 
@@ -59,9 +58,9 @@ public class TableCreator {
                     }
                     rowsSoFar++;
                     if (task != null) {
-                        int p = totalRows / rowsSoFar;
-                        //task.updateProgress(p);
-                        System.out.println(totalRows + " - " + rowsSoFar + " - " + p);
+                        int p = (rowsSoFar * 100) / totalRows;
+                        task.updateProgress(p);
+                        System.out.println(rowsSoFar + " - " + totalRows + " - " + " - " + p);
                     }
                     data.add(row);
                 }

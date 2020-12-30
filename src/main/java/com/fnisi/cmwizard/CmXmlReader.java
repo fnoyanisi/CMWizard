@@ -53,7 +53,6 @@ public class CmXmlReader {
 
                 properties.putIfAbsent(managedObjectClassName, new HashSet<>());
 
-
                 // set the name afterwards when the "name" property is read from
                 // the reference XML file
                 ManagedObject mo = new ManagedObject("", managedObjectClassName);
