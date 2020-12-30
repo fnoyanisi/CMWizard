@@ -1,10 +1,13 @@
 package com.fnisi.cmwizard;
 
+import sun.lwawt.macosx.CSystemTray;
+
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Vector;
 import java.util.List;
@@ -63,6 +66,8 @@ public class TableCreator {
                     }
                     data.add(row);
                 }
+
+                List<Integer> selectedColumns = new ArrayList<>();
                 JTable table = new JTable(data, header) {
                     // make the first column non-editable
                     @Override
@@ -87,15 +92,44 @@ public class TableCreator {
                         return c;
                     }
                 };
+
+                // enable selection
+                table.setColumnSelectionAllowed(true);
+                table.setRowSelectionAllowed(true);
+                table.setCellSelectionEnabled(true);
+                table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+
+                table.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        super.mouseClicked(e);
+                        selectedColumns.clear();
+                    }
+                });
+
                 // add a MouseListener to column header so that the user can select
                 // a column when the header is clicked
                 table.getTableHeader().addMouseListener(new MouseAdapter() {
                     @Override
                     public void mousePressed(MouseEvent e) {
                         super.mousePressed(e);
-                        int clickedIndex = table.convertColumnIndexToModel(table.columnAtPoint(e.getPoint()));
-                        table.setColumnSelectionInterval(clickedIndex, clickedIndex); //selects which column will have all its rows selected
-                        table.setRowSelectionInterval(0, table.getRowCount() - 1); //once column has been selected, select all rows from 0 to the end of that column
+
+                        // Ctrl + click to select columns
+                        if (e.isControlDown()) {
+                            int clickedIndex = table.convertColumnIndexToModel(table.columnAtPoint(e.getPoint()));
+                            selectedColumns.add(clickedIndex);
+
+                            for (Integer column : selectedColumns) {
+                                table.addColumnSelectionInterval(column, column);
+                                //once column has been selected, select all rows from 0 to the end of that column
+                                table.setRowSelectionInterval(0, table.getRowCount() - 1);
+                            }
+                            System.out.print("Selected columns : ");
+                            for (Integer c : selectedColumns) {
+                                System.out.print(c + " - ");
+                            }
+                            System.out.println();
+                        }
                     }
                 });
                 table.setPreferredScrollableViewportSize(table.getPreferredSize());
@@ -105,10 +139,6 @@ public class TableCreator {
                 table.getTableHeader().setBackground(headerColor);
                 table.setShowGrid(true);
                 table.setAutoCreateRowSorter(true);
-                table.setColumnSelectionAllowed(true);
-                table.setRowSelectionAllowed(true);
-                table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-                table.setCellSelectionEnabled(true);
 
                 JScrollPane scrollPane = new JScrollPane(table);
                 scrollPane.add(table.getTableHeader());
