@@ -1,7 +1,5 @@
 package com.fnisi.cmwizard;
 
-import sun.lwawt.macosx.CSystemTray;
-
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
@@ -15,7 +13,7 @@ import java.util.List;
 public class TableCreator {
     private final JTabbedPane tabbedPane;
     private final CmXmlReader cmXmlReader;
-    private final Color headerColor, gridColor, bgColor, selectionColor;
+    private final Color headerColor, gridColor, fgColor, bgColor, selectionBgColor, selectionFgColor;
     private final Font headerFont;
     private Task task;
 
@@ -25,7 +23,9 @@ public class TableCreator {
         this.headerColor = new Color(198, 198, 198);
         this.gridColor = new Color(0, 0, 0);
         this.bgColor = new Color(250, 250, 250);
-        this.selectionColor = new Color(5, 52, 154);
+        this.fgColor = new Color(0, 0, 0);
+        this.selectionBgColor = new Color(32, 85, 199);
+        this.selectionFgColor = new Color(255, 255, 255);
         this.headerFont = new Font("Arial", Font.PLAIN, 12);
         this.task = null;
     }
@@ -87,7 +87,11 @@ public class TableCreator {
                         }
 
                         if (isCellSelected(row, column)) {
-                            c.setBackground(selectionColor);
+                            c.setBackground(selectionBgColor);
+                            c.setForeground(selectionFgColor);
+                        } else {
+                            c.setBackground(bgColor);
+                            c.setForeground(fgColor);
                         }
                         return c;
                     }
@@ -103,6 +107,7 @@ public class TableCreator {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         super.mouseClicked(e);
+                        // clear the column selection
                         selectedColumns.clear();
                     }
                 });
@@ -124,11 +129,6 @@ public class TableCreator {
                                 //once column has been selected, select all rows from 0 to the end of that column
                                 table.setRowSelectionInterval(0, table.getRowCount() - 1);
                             }
-                            System.out.print("Selected columns : ");
-                            for (Integer c : selectedColumns) {
-                                System.out.print(c + " - ");
-                            }
-                            System.out.println();
                         }
                     }
                 });
