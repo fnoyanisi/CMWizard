@@ -11,15 +11,18 @@ import java.util.Vector;
 import java.util.List;
 
 public class TableCreator {
-    private final JTabbedPane tabbedPane;
     private final CmXmlReader cmXmlReader;
     private final Color headerColor, gridColor, fgColor, bgColor, selectionBgColor, selectionFgColor;
     private final Font headerFont;
     private Task task;
 
+    public TableCreator(CmXmlReader cmXmlReader, Task task) {
+        this(cmXmlReader);
+        setTask(task);
+    }
+
     public TableCreator(CmXmlReader cmXmlReader) {
         this.cmXmlReader = cmXmlReader;
-        this.tabbedPane = new JTabbedPane();
         this.headerColor = new Color(198, 198, 198);
         this.gridColor = new Color(0, 0, 0);
         this.bgColor = new Color(250, 250, 250);
@@ -34,7 +37,20 @@ public class TableCreator {
         this.task = t;
     }
 
+    public void showGui() {
+        JFrame frame = new JFrame("TabbedPaneDemo");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        //Add content to the window.
+        frame.add(createTabs(), BorderLayout.CENTER);
+
+        //Display the window.
+        frame.pack();
+        frame.setVisible(true);
+    }
+
     public JComponent createTabs() {
+        JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setBackground(new Color(12, 234, 170, 81));
 
         if (cmXmlReader != null) {
@@ -146,16 +162,6 @@ public class TableCreator {
                 tabbedPane.addTab(moClassName,scrollPane);
             }
         }
-
-        JFrame frame = new JFrame("TabbedPaneDemo");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        //Add content to the window.
-        frame.add(tabbedPane, BorderLayout.CENTER);
-
-        //Display the window.
-        frame.pack();
-        frame.setVisible(true);
-        return null;
+        return tabbedPane;
     }
 }

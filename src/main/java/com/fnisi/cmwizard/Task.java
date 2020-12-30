@@ -21,10 +21,8 @@ class Task extends SwingWorker<Void, Void> {
         int progress = 0, totalRecords;
 
         setProgress(0);
-        CmXmlReader cmXmlReader = new CmXmlReader(file);
-        TableCreator tc = new TableCreator(cmXmlReader);
-        tc.setTask(this);
-        tc.createTabs();
+        TableCreator tc = new TableCreator(new CmXmlReader(file), this);
+        tc.showGui();
         return null;
     }
 
