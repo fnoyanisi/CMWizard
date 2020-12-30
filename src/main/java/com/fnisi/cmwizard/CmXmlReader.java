@@ -17,11 +17,13 @@ import java.util.*;
 public class CmXmlReader {
     private File xmlFile;
     private Document doc;
-    private Set<ManagedObjectClass> managedObjectClasses;
+    private Map<String, ManagedObjectClass> managedObjectClasses;
+    private Map<String, Set<String>> properties;
 
     public CmXmlReader(File file) throws ParserConfigurationException, IOException, SAXException {
         this.xmlFile = file;
-        this.managedObjectClasses = new TreeSet<>();
+        this.managedObjectClasses = new TreeMap<>();
+        this.properties = new TreeMap<>();
 
         // read and parse the XML file
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -40,15 +42,17 @@ public class CmXmlReader {
         doc.getDocumentElement().normalize();
 
         // traverse through all the nodes. we are interested in managedObject nodes
-        NodeList managedObjectNodeList = doc.getElementsByTagName("managedObject");
-
-        for (int index = 0; index < managedObjectNodeList.getLength(); index++) {
-            Node managedObjectNode = managedObjectNodeList.item(index);
-
+        NodeList nodeList = doc.getElementsByTagName("managedObject");
+        for (int index = 0; index < nodeList.getLength(); index++) {
+            Node managedObjectNode = nodeList.item(index);
             Node managedObjectNodeClass = managedObjectNode.getAttributes().getNamedItem("class");
+
             if (managedObjectNodeClass != null && managedObjectNodeClass.getNodeType() == Node.ATTRIBUTE_NODE) {
                 String managedObjectClassName = managedObjectNodeClass.getNodeValue();
-                ManagedObjectClass managedObjectClass = new ManagedObjectClass(managedObjectClassName);
+                ManagedObjectClass managedObjectClass = managedObjectClasses.getOrDefault(managedObjectClassName, new ManagedObjectClass(managedObjectClassName));
+
+                properties.putIfAbsent(managedObjectClassName, new HashSet<>());
+
 
                 // set the name afterwards when the "name" property is read from
                 // the reference XML file
@@ -68,7 +72,7 @@ public class CmXmlReader {
 
                         // this maintains the list of all possible properties for each
                         // managed object class
-                        managedObjectClass.addProperty(pname);
+                        properties.get(managedObjectClassName).add(pname);
 
                         // we deferred defining the name for the managed object
                         if (pname.compareTo("name") == 0){
@@ -77,37 +81,34 @@ public class CmXmlReader {
                         mo.addProperty(pname, pvalue);
                     }
                 }
-                // add this managed object to the map
-                // managed object class -> list of managed objects of type class
                 managedObjectClass.addManagedObject(mo);
+                managedObjectClasses.put(managedObjectClassName, managedObjectClass);
             }
         }
 
+        // update the properties list of all ManagedObjectClass objects
+        // doing this outside of the loop above provides some performance benefits
+        for (String moClassName : managedObjectClasses.keySet()) {
+            managedObjectClasses.get(moClassName).setProperties(properties.get(moClassName));
+        }
     }
 
     // returns an alphabetically sorted list of managedObjects names
-    public List<String> getMoClasses() {
-        List<String> moClasses = new ArrayList<>();
-        for (ManagedObjectClass moc: managedObjectClasses) {
-            moClasses.add(moc.getName());
-        }
-        Collections.sort(moClasses);
-        return moClasses;
+    public List<String> getManagedObjectClassNames() {
+        return new ArrayList<>(managedObjectClasses.keySet());
     }
 
     public List<ManagedObject> getManagedObjects() {
         List<ManagedObject> mo = new ArrayList<>();
-        for (ManagedObjectClass moc : managedObjectClasses){
-            mo.addAll(moc.getManagedObjects());
+        for (Map.Entry<String, ManagedObjectClass> entry : managedObjectClasses.entrySet()){
+            mo.addAll(entry.getValue());
         }
         return mo;
     }
 
     public List<ManagedObject> getManagedObjectsOf(String mocName){
-        for (ManagedObjectClass moc : managedObjectClasses) {
-            if (moc.getName().compareTo(mocName) == 0) {
-                return moc.getManagedObjects();
-            }
+        if (managedObjectClasses.containsKey(mocName)) {
+            return managedObjectClasses.get(mocName);
         }
         return null;
     }
@@ -116,12 +117,10 @@ public class CmXmlReader {
     // contains. If the XML document does not have a managed object
     // with moName, an empty list is returned
     public List<String> getPropertiesOf(String mocName) {
-        for (ManagedObjectClass moc: managedObjectClasses) {
-            if (moc.getName().compareTo(mocName) == 0){
-                List<String> ret = new ArrayList<>(moc.getProperties());
-                Collections.sort(ret);
-                return ret;
-            }
+        if (managedObjectClasses.containsKey(mocName)) {
+            List<String> ret = new ArrayList<>(managedObjectClasses.get(mocName).getProperties());
+            Collections.sort(ret);
+            return ret;
         }
         return null;
     }
@@ -130,8 +129,8 @@ public class CmXmlReader {
     // whole XML tree
     public int getTotalNumberOfManagedObjects() {
         int n = 0;
-        for (ManagedObjectClass moc : managedObjectClasses) {
-            n += moc.getManagedObjects().size();
+        for (String moClassName : managedObjectClasses.keySet()) {
+            n += getNumberOfManagedObjectsFor(moClassName);
         }
         return n;
     }
@@ -139,10 +138,8 @@ public class CmXmlReader {
     // returns the number of managed objects only for the
     // managed object class given by the type parameter
     public int getNumberOfManagedObjectsFor(String mocName) {
-        for (ManagedObjectClass moc : managedObjectClasses){
-            if (moc.getName().compareTo(mocName) == 0){
-                return moc.getManagedObjects().size();
-            }
+        if (managedObjectClasses.containsKey(mocName)) {
+            return managedObjectClasses.get(mocName).size();
         }
         return -1;
     }

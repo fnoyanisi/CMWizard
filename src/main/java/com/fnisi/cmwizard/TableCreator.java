@@ -14,7 +14,6 @@ public class TableCreator {
     private CmXmlReader cmXmlReader;
     private final Color headerColor, gridColor, bgColor, selectionColor;
     private final Font headerFont;
-    private int totalRows;
     private Task task;
 
     public TableCreator(CmXmlReader cmXmlReader) {
@@ -35,38 +34,33 @@ public class TableCreator {
 
     public JComponent createTabs() {
         tabbedPane.setBackground(new Color(12, 234, 170, 81));
-        int rowsSoFar = 0;
 
         if (cmXmlReader != null) {
-            totalRows = cmXmlReader.getNumberOfManagedObjects();
-            for (Map.Entry<String, List<ManagedObject>> entry: cmXmlReader.getManagedObjects().entrySet()) {
-                // key -> managedObject class
-                // value -> list of managed objects in this class
-                Vector<String> header = new Vector<>(cmXmlReader.getPropertiesOf(entry.getKey()));
+            final int totalRows = cmXmlReader.getTotalNumberOfManagedObjects();
+            int rowsSoFar = 0;
+            for (String moClassName : cmXmlReader.getManagedObjectClassNames()) {
+                List<String> moClassProperties = cmXmlReader.getPropertiesOf(moClassName);
+                Vector<String> header = new Vector<>(moClassProperties);
                 header.add(0, "Name");
                 Vector<Vector<String>> data = new Vector<>();
 
                 // for each managedObject, iterate through its properties
                 // and construct a vector that will be used for the JTable
-                for (ManagedObject mo : entry.getValue()) {
+                for (ManagedObject mo : cmXmlReader.getManagedObjectsOf(moClassName)) {
                     Map<String, String> properties = mo.getProperties();
 
                     // while populating the data, use the properties list returned from
-                    // getPropertiesOf() method since this includes every possible
-                    // properties.
+                    // ManagedObjectClass.getPropertiesOf() method since this includes every
+                    // possible properties.
                     Vector<String> row = new Vector<>();
                     row.add(0, mo.getName());
-                    for (String property: cmXmlReader.getPropertiesOf(entry.getKey())) {
-                        if(properties.containsKey(property)) {
-                            row.add(properties.get(property));
-                        } else {
-                            row.add("#N/A");
-                        }
+                    for (String property: moClassProperties) {
+                        row.add(properties.getOrDefault(property, "#N/A"));
                     }
                     rowsSoFar++;
                     if (task != null) {
                         int p = totalRows / rowsSoFar;
-                        task.updateProgress(p);
+                        //task.updateProgress(p);
                         System.out.println(totalRows + " - " + rowsSoFar + " - " + p);
                     }
                     data.add(row);
@@ -121,7 +115,7 @@ public class TableCreator {
                 JScrollPane scrollPane = new JScrollPane(table);
                 scrollPane.add(table.getTableHeader());
 
-                tabbedPane.addTab(entry.getKey(),scrollPane);
+                tabbedPane.addTab(moClassName,scrollPane);
             }
         }
 

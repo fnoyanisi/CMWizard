@@ -2,25 +2,17 @@ package com.fnisi.cmwizard;
 
 import java.util.*;
 
-public class ManagedObjectClass implements Comparable<ManagedObjectClass>, Iterable<ManagedObject> {
-    private List<ManagedObject> managedObjects;
+public class ManagedObjectClass extends ArrayList<ManagedObject> implements Comparable<ManagedObjectClass> {
     private final String name;
     private Set<String> properties;
-    private int nextIndex;          // array index to be used for the next ManagedObject in the list
 
     public ManagedObjectClass(String name) {
         this.name = name;
-        this.managedObjects = new ArrayList<>();
         this.properties = new TreeSet<>();
-        this.nextIndex = 0;
-    }
-
-    public List<ManagedObject> getManagedObjects() {
-        return managedObjects;
     }
 
     public void addManagedObject(ManagedObject managedObject) {
-        managedObjects.add(managedObject);
+        add(managedObject);
     }
 
     public String getName() {
@@ -31,23 +23,20 @@ public class ManagedObjectClass implements Comparable<ManagedObjectClass>, Itera
         properties.add(property);
     }
 
-    public boolean hasProperty(String property){
+    public boolean containsProperty(String property){
         return properties.contains(property);
     }
 
     public ManagedObject getManagedObject(int index) {
-        if (nextIndex > 0 && index >= 0 && index < managedObjects.size()) {
-            return managedObjects.get(index);
-        }
-        return null;
+        return this.get(index);
     }
 
     public Set<String> getProperties(){
         return properties;
     }
 
-    public int getNextIndex() {
-        return nextIndex;
+    public void setProperties(Set<String> properties) {
+        this.properties = properties;
     }
 
     @Override
@@ -56,25 +45,16 @@ public class ManagedObjectClass implements Comparable<ManagedObjectClass>, Itera
     }
 
     @Override
-    public Iterator<ManagedObject> iterator() {
-        return new ManagedObjectClassIterator(this);
-    }
-}
-
-class ManagedObjectClassIterator implements Iterator<ManagedObject> {
-    private final ManagedObjectClass moc;
-
-    public ManagedObjectClassIterator(ManagedObjectClass moc){
-        this.moc = moc;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ManagedObjectClass that = (ManagedObjectClass) o;
+        return name.equals(that.name) && properties.equals(that.properties);
     }
 
     @Override
-    public boolean hasNext() {
-        return moc.getManagedObjects().size() > moc.getNextIndex();
+    public int hashCode() {
+        return Objects.hash(name, properties);
     }
 
-    @Override
-    public ManagedObject next() {
-        return moc.getManagedObject(moc.getNextIndex());
-    }
 }

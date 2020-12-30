@@ -42,4 +42,17 @@ public class ManagedObject {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ManagedObject that = (ManagedObject) o;
+        return name.equals(that.name) && type.equals(that.type) && properties.equals(that.properties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, type, properties);
+    }
 }
