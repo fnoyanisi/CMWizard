@@ -105,7 +105,7 @@ public class TableCreator {
                         if (isCellSelected(row, column)) {
                             c.setBackground(selectionBgColor);
                             c.setForeground(selectionFgColor);
-                        } else {
+                        } else if (column != 0) {
                             c.setBackground(bgColor);
                             c.setForeground(fgColor);
                         }
@@ -125,6 +125,7 @@ public class TableCreator {
                         super.mouseClicked(e);
                         // clear the column selection
                         selectedColumns.clear();
+
                     }
                 });
 
@@ -134,6 +135,7 @@ public class TableCreator {
                     @Override
                     public void mousePressed(MouseEvent e) {
                         super.mousePressed(e);
+                        table.clearSelection();
 
                         // Ctrl + click to select columns
                         if (e.isControlDown()) {
@@ -145,6 +147,8 @@ public class TableCreator {
                                 //once column has been selected, select all rows from 0 to the end of that column
                                 table.setRowSelectionInterval(0, table.getRowCount() - 1);
                             }
+                        } else {
+                            selectedColumns.clear();
                         }
                     }
                 });
