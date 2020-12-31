@@ -1,20 +1,26 @@
 package com.fnisi.cmwizard;
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 import java.util.List;
 
 public class TableCreator {
+
     private final CmXmlReader cmXmlReader;
     private final Color headerColor, gridColor, fgColor, bgColor, selectionBgColor, selectionFgColor;
     private final Font headerFont;
     private Task task;
+    private JTable table;
+    private Set<Integer> selectedColumns;
+    private List<Integer> selectedRows;
 
     public TableCreator(CmXmlReader cmXmlReader, Task task) {
         this(cmXmlReader);
@@ -31,6 +37,9 @@ public class TableCreator {
         this.selectionFgColor = new Color(255, 255, 255);
         this.headerFont = new Font("Arial", Font.PLAIN, 12);
         this.task = null;
+        this.selectedColumns = new HashSet<>();
+        this.selectedRows = new ArrayList<>();
+        this.table = null;
     }
 
     public void setTask(Task t) {
@@ -42,6 +51,7 @@ public class TableCreator {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //Add content to the window.
+        frame.add(createRemoveCheckedButton(), BorderLayout.NORTH);
         frame.add(createTabs(), BorderLayout.CENTER);
 
         //Display the window.
@@ -49,7 +59,15 @@ public class TableCreator {
         frame.setVisible(true);
     }
 
-    public JComponent createTabs() {
+    private JComponent createRemoveCheckedButton(){
+        JButton button = new JButton("Remove checked rows");
+        button.addActionListener((ActionEvent event) -> {
+
+        });
+        return button;
+    }
+
+    private JComponent createTabs() {
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setBackground(new Color(12, 234, 170, 81));
 
@@ -59,8 +77,9 @@ public class TableCreator {
             for (String moClassName : cmXmlReader.getManagedObjectClassNames()) {
                 List<String> moClassProperties = cmXmlReader.getPropertiesOf(moClassName);
                 Vector<String> header = new Vector<>(moClassProperties);
-                header.add(0, "Name");
-                Vector<Vector<String>> data = new Vector<>();
+                header.add(0, "Checked");
+                header.add(1, "Name");
+                Vector<Vector<Object>> data = new Vector<>();
 
                 // for each managedObject, iterate through its properties
                 // and construct a vector that will be used for the JTable
@@ -70,8 +89,9 @@ public class TableCreator {
                     // while populating the data, use the properties list returned from
                     // ManagedObjectClass.getPropertiesOf() method since this includes every
                     // possible properties.
-                    Vector<String> row = new Vector<>();
-                    row.add(0, mo.getName());
+                    Vector<Object> row = new Vector<>();
+                    row.add(Boolean.FALSE);
+                    row.add(1, mo.getName());
                     for (String property: moClassProperties) {
                         row.add(properties.getOrDefault(property, "#N/A"));
                     }
@@ -83,19 +103,27 @@ public class TableCreator {
                     data.add(row);
                 }
 
-                List<Integer> selectedColumns = new ArrayList<>();
-                JTable table = new JTable(data, header) {
+                table = new JTable(data, header) {
                     // make the first column non-editable
                     @Override
                     public boolean isCellEditable(int row, int column) {
-                        return column != 0;
+                        return column != 1;
+                    }
+
+                    // display check boxes for the first column
+                    @Override
+                    public Class<?> getColumnClass(int columnIndex) {
+                        if (columnIndex == 0)
+                            return Boolean.class;
+                        else
+                            return super.getColumnClass(columnIndex);
                     }
 
                     // match the format of the first column with the header's
                     @Override
                     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
                         Component c = super.prepareRenderer(renderer, row, column);
-                        if (column == 0) {
+                        if (column == 0 || column == 1) {
                             c.setBackground(headerColor);
                             c.setFont(headerFont);
                         } else {
@@ -105,7 +133,7 @@ public class TableCreator {
                         if (isCellSelected(row, column)) {
                             c.setBackground(selectionBgColor);
                             c.setForeground(selectionFgColor);
-                        } else if (column != 0) {
+                        } else if (column != 0 && column != 1) {
                             c.setBackground(bgColor);
                             c.setForeground(fgColor);
                         }
@@ -115,17 +143,15 @@ public class TableCreator {
 
                 // enable selection
                 table.setColumnSelectionAllowed(true);
-                table.setRowSelectionAllowed(true);
                 table.setCellSelectionEnabled(true);
                 table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
                 table.addMouseListener(new MouseAdapter() {
                     @Override
-                    public void mouseClicked(MouseEvent e) {
-                        super.mouseClicked(e);
+                    public void mousePressed(MouseEvent e) {
+                        super.mousePressed(e);
                         // clear the column selection
                         selectedColumns.clear();
-
                     }
                 });
 
@@ -139,8 +165,8 @@ public class TableCreator {
 
                         // Ctrl + click to select columns
                         if (e.isControlDown()) {
-                            int clickedIndex = table.convertColumnIndexToModel(table.columnAtPoint(e.getPoint()));
-                            selectedColumns.add(clickedIndex);
+                            int clickedColumn = table.convertColumnIndexToModel(table.columnAtPoint(e.getPoint()));
+                            selectedColumns.add(clickedColumn);
 
                             for (Integer column : selectedColumns) {
                                 table.addColumnSelectionInterval(column, column);
@@ -149,6 +175,17 @@ public class TableCreator {
                             }
                         } else {
                             selectedColumns.clear();
+                        }
+                    }
+                });
+                table.getModel().addTableModelListener(new TableModelListener() {
+                    @Override
+                    public void tableChanged(TableModelEvent e) {
+                        if (e.getColumn() == 0) {
+                            int row = e.getFirstRow();
+                            TableModel model = (TableModel) e.getSource();
+                            Boolean checked = (Boolean) model.getValueAt(row, 0);
+                            System.out.println(row + ",0 = " + checked);
                         }
                     }
                 });
