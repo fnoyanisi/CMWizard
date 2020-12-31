@@ -178,6 +178,9 @@ public class TableCreator {
                         }
                     }
                 });
+
+                table.getTableHeader().setToolTipText("Click to sort; Control-Click to select");
+
                 table.getModel().addTableModelListener(new TableModelListener() {
                     @Override
                     public void tableChanged(TableModelEvent e) {
